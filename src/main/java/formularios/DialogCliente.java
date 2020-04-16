@@ -2,7 +2,10 @@ package formularios;
 
 import java.awt.BorderLayout;
 import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
@@ -30,8 +33,7 @@ public class DialogCliente extends JFrame {
 
 		setSize(600, 250);
 		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);// dispose para mantener la maquina virtual funcionando y
-														// optimizar la memoria
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 
 		// ----------Menú superior------------
@@ -56,17 +58,44 @@ public class DialogCliente extends JFrame {
 		JMenuItem itmChangeUsr = new JMenuItem("Cambiar usuario");
 		itmChangeUsr.setMnemonic(KeyEvent.VK_U);
 		itmChangeUsr.setAccelerator(KeyStroke.getKeyStroke("ctrl U"));
-
+		
+		itmChangeUsr.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				cambiarUsuario();
+			}
+		});
+		
+		
 		// Cargar datos
 		JMenuItem cDatos = new JMenuItem("Cargar Datos");
 		cDatos.setMnemonic(KeyEvent.VK_D);
 		cDatos.setAccelerator(KeyStroke.getKeyStroke("ctrl D"));
-
-		// Cambiar Usuario
+		
+		cDatos.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				
+				cargarDatos();
+				
+			}
+		});
+		
+		
+		// Limpiar datos
 		JMenuItem lDatos = new JMenuItem("Limpiar Datos");
 		lDatos.setMnemonic(KeyEvent.VK_L);
 		lDatos.setAccelerator(KeyStroke.getKeyStroke("ctrl L"));
-
+		
+		lDatos.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				
+				
+			}
+		});
+		
+		
 		// ******Informes******
 		JMenu dInfo = new JMenu("Informes");
 		dInfo.setMnemonic(KeyEvent.VK_I);
@@ -91,6 +120,32 @@ public class DialogCliente extends JFrame {
 		menuBar.add(dInfo);
 		setJMenuBar(menuBar);
 
+	}
+
+	protected void cargarDatos() {
+		Connection conn = null;
+		
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Acme?serverTimezone=Europe/Madrid",
+					this.usuario, this.contrasena);
+			
+			String dni = JOptionPane.showInputDialog(this, "Introduce el dni de cliente", 
+					"Busqueda de cliente", JOptionPane.QUESTION_MESSAGE);
+		
+		
+		}catch (SQLException ex){//SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
+			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
+			
+			
+		}
+		
+		
+	}
+
+	protected void cambiarUsuario() {
+		login.setVisible(true);
+		setVisible(false);
+		
 	}
 
 }

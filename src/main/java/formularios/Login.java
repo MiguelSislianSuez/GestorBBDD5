@@ -93,7 +93,13 @@ public class Login extends JDialog {
 	}
 
 	protected void cancelar() {
-		System.exit(DO_NOTHING_ON_CLOSE);
+		
+		if (dc == null) {
+			System.exit(DO_NOTHING_ON_CLOSE);
+		
+		}//si no es igual a null...etnocnces vamos al dialogo
+		 dc.setVisible(true);
+		 setVisible(false);
 		
 	}
 
