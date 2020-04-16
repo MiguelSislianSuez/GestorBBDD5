@@ -1,20 +1,28 @@
 package formularios;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.border.EmptyBorder;
 
 import com.mysql.cj.jdbc.Driver;
 
@@ -23,6 +31,12 @@ public class DialogCliente extends JFrame {
 	private String usuario;
 	private String contrasena;
 	private Login login;
+	private JPanel pnlCampos;
+	private JTextField txtDni;
+	private JTextField txtNombre;
+	private JTextField txtApellido1;
+	private JTextField txtApellido2;
+	private JTextField txtFechaNacimiento;
 
 	public DialogCliente(String usuario, String contrasena, Login login) throws HeadlessException {
 
@@ -39,6 +53,7 @@ public class DialogCliente extends JFrame {
 		// ----------Menú superior------------
 
 		menuSup();
+		crearCampos();
 		
 		try {
 			DriverManager.registerDriver(new Driver());
@@ -46,6 +61,37 @@ public class DialogCliente extends JFrame {
 			JOptionPane.showMessageDialog(this, "Error de registros del driver", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 
+	}
+
+	private void crearCampos() {
+
+		pnlCampos = new JPanel();
+		pnlCampos.setLayout(new GridLayout(5,2,0,0));
+		pnlCampos.setBorder(new EmptyBorder(30,30,0,30));
+		
+		pnlCampos.add(new JLabel("DNI"));
+		txtDni = new JTextField();
+		pnlCampos.add(txtDni);
+
+		
+		pnlCampos.add(new JLabel("Nombre"));
+		txtNombre = new JTextField();
+		pnlCampos.add(txtNombre);
+
+		pnlCampos.add(new JLabel("Apellido1"));
+		txtApellido1 = new JTextField();
+		pnlCampos.add(txtApellido1);
+		
+		pnlCampos.add(new JLabel("Apellido2"));
+		txtApellido2 = new JTextField();
+		pnlCampos.add(txtApellido2);
+		
+		pnlCampos.add(new JLabel("Fecha de nacimiento"));
+		txtFechaNacimiento = new JTextField();
+		pnlCampos.add(txtFechaNacimiento);
+		
+		add(pnlCampos, BorderLayout.NORTH); //para que todos los campos que meta entren por arriba
+		
 	}
 
 	private void menuSup() {
@@ -58,48 +104,43 @@ public class DialogCliente extends JFrame {
 		JMenuItem itmChangeUsr = new JMenuItem("Cambiar usuario");
 		itmChangeUsr.setMnemonic(KeyEvent.VK_U);
 		itmChangeUsr.setAccelerator(KeyStroke.getKeyStroke("ctrl U"));
-		
+
 		itmChangeUsr.addActionListener(new ActionListener() {
-			
+
 			public void actionPerformed(ActionEvent e) {
 				cambiarUsuario();
 			}
 		});
-		
-		
+
 		// Cargar datos
 		JMenuItem cDatos = new JMenuItem("Cargar Datos");
 		cDatos.setMnemonic(KeyEvent.VK_D);
 		cDatos.setAccelerator(KeyStroke.getKeyStroke("ctrl D"));
-		
+
 		cDatos.addActionListener(new ActionListener() {
-			
+
 			public void actionPerformed(ActionEvent e) {
-				
+
 				cargarDatos();
-				
+
 			}
 		});
-		
-		
+
 		// Limpiar datos
 		JMenuItem lDatos = new JMenuItem("Limpiar Datos");
 		lDatos.setMnemonic(KeyEvent.VK_L);
 		lDatos.setAccelerator(KeyStroke.getKeyStroke("ctrl L"));
-		
+
 		lDatos.addActionListener(new ActionListener() {
-			
+
 			public void actionPerformed(ActionEvent e) {
-				
-				
+
 			}
 		});
-		
-		
+
 		// ******Informes******
 		JMenu dInfo = new JMenu("Informes");
 		dInfo.setMnemonic(KeyEvent.VK_I);
-
 
 		// Facturas
 		JMenuItem itmFactura = new JMenuItem("Facturas");
@@ -124,28 +165,43 @@ public class DialogCliente extends JFrame {
 
 	protected void cargarDatos() {
 		Connection conn = null;
-		
+
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/Acme?serverTimezone=Europe/Madrid",
-					this.usuario, this.contrasena);
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Acme?serverTimezone=Europe/Madrid", this.usuario,
+					this.contrasena);
+
+			String dni = JOptionPane.showInputDialog(this, "Introduce el dni de cliente", "Busqueda de cliente",
+					JOptionPane.QUESTION_MESSAGE);
+			if(dni != null && !dni.equals("")) {//si dni es diferente a null y a campo vacio sale del dialogo
+				return;
+			}
 			
-			String dni = JOptionPane.showInputDialog(this, "Introduce el dni de cliente", 
-					"Busqueda de cliente", JOptionPane.QUESTION_MESSAGE);
-		
-		
-		}catch (SQLException ex){//SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
+			
+			//--------Buscamos clientes y datos a campos
+			PreparedStatement ps = conn.prepareStatement("SELECT Nombre, Ae1, Aq2, Fec_Nac FROM Clientes WHERE DNI = ?");
+			ps.setString(1, dni);
+			ResultSet rs = ps.executeQuery(); 
+			
+
+		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
 			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
-			
-			
+
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException ex1) {
+					System.out.println("Excepción. Cerrando conexión");
+				}
+			}
 		}
-		
-		
+
 	}
 
 	protected void cambiarUsuario() {
 		login.setVisible(true);
 		setVisible(false);
-		
+
 	}
 
 }
