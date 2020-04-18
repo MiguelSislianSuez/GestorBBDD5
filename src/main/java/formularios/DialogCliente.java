@@ -112,6 +112,7 @@ public class DialogCliente extends JFrame {
 			}
 		});
 
+		
 		// Cargar datos
 		JMenuItem cDatos = new JMenuItem("Cargar Datos");
 		cDatos.setMnemonic(KeyEvent.VK_D);
@@ -126,6 +127,7 @@ public class DialogCliente extends JFrame {
 			}
 		});
 
+		
 		// Limpiar datos
 		JMenuItem lDatos = new JMenuItem("Limpiar Datos");
 		lDatos.setMnemonic(KeyEvent.VK_L);
@@ -172,16 +174,30 @@ public class DialogCliente extends JFrame {
 
 			String dni = JOptionPane.showInputDialog(this, "Introduce el dni de cliente", "Busqueda de cliente",
 					JOptionPane.QUESTION_MESSAGE);
-			if(dni != null && !dni.equals("")) {//si dni es diferente a null y a campo vacio sale del dialogo
+			if(dni == null && dni.equals("")) {//si dni es diferente a null y a campo vacio sale del dialogo
+				JOptionPane.showMessageDialog(this, "Introduce el dni de cliente", "Introduzca un dni",
+						JOptionPane.QUESTION_MESSAGE);
 				return;
 			}
 			
 			
 			//--------Buscamos clientes y datos a campos
-			PreparedStatement ps = conn.prepareStatement("SELECT Nombre, Ae1, Aq2, Fec_Nac FROM Clientes WHERE DNI = ?");
-			ps.setString(1, dni);
-			ResultSet rs = ps.executeQuery(); 
-			
+			PreparedStatement ps = conn.prepareStatement("SELECT Nombre, Ape1, Ape2, Fec_Nac FROM Clientes WHERE DNI = ?");
+			ps.setString(1, dni);//valor un que se gurda en resultst
+			ResultSet rs = ps.executeQuery(); //
+			if (rs.first()) { //first mostrará la primera linea si exise, y coloca el cursor en esa línea (parece al next)
+				txtDni.setText(dni);
+				txtDni.setEditable(false);//aseguramos que no se pueda modificar el dni
+				txtNombre.setText(rs.getString("Nombre"));
+				txtApellido1.setText(rs.getString("Ape1"));
+				txtApellido2.setText(rs.getObject("Ape2") == null ? "" : rs.getNString("Apellido2")); //hacemos la comprobacion con getObject, si es nula dejamos campo vacilo
+				//sino escribe apellido dos
+				txtFechaNacimiento.setText(rs.getDate("Fec_Nac").toString());
+				
+			}else {
+				JOptionPane.showMessageDialog(this, "No existe ningún cliente con ese DNI",
+						"Error en la búsqueda", JOptionPane.ERROR_MESSAGE);
+			}
 
 		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
 			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);

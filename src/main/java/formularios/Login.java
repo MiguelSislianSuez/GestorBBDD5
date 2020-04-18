@@ -57,6 +57,7 @@ public class Login extends JDialog {
 			
 		});
 		
+		
 		//Hacer botones 
 		//Funcionalidades
 		JButton btnAceptar = new JButton("Aceptar");
@@ -114,5 +115,6 @@ public class Login extends JDialog {
 		}
 		dc = new DialogCliente(txtUser.getText(), txtPwd.getText(), this);
 		dc.setVisible(true);
+		this.setVisible(false);
 	}
 }
