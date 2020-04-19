@@ -1,9 +1,12 @@
 package formularios;
 
+import java.awt.Color;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.DefaultTableModel;
 
 
@@ -37,7 +40,7 @@ public class ModeloTabla extends DefaultTableModel {//mostrará las tablas
 			}
 			
 			addRow(row);
-			
+			UIManager.put("Table.gridColor", new ColorUIResource(Color.gray));
 		}
 		
 		} catch (SQLException e) {
