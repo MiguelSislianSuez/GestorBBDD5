@@ -109,11 +109,11 @@ public class Login extends JDialog {
 			JOptionPane.showMessageDialog(this, "Introduzca usuario", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		if("".equals(txtPwd.getText())) {
+		if(txtPwd.getPassword().length == 0) {
 			JOptionPane.showMessageDialog(this, "Introduzca contraseña", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		dc = new DialogCliente(txtUser.getText(), txtPwd.getText(), this);
+		dc = new DialogCliente(txtUser.getText(), String.valueOf(txtPwd.getPassword()), this);
 		dc.setVisible(true);
 		this.setVisible(false);
 	}

@@ -91,11 +91,11 @@ public class DialogCliente extends JFrame {
 
 		JButton btnEliminar = new JButton("Eliminar cliente");
 		btnEliminar.addActionListener(new ActionListener() {
-			
+
 			public void actionPerformed(ActionEvent e) {
 
 				eliminar();
-				
+
 			}
 		});
 		pnlBotons.add(btnEliminar);
@@ -105,20 +105,21 @@ public class DialogCliente extends JFrame {
 	}
 
 	protected void eliminar() {
-		
+
 		Connection conn = null;
 
 		try {
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/Acme?serverTimezone=Europe/Madrid", this.usuario,
 					this.contrasena);
-			
+
 			PreparedStatement ps = conn.prepareStatement("DELETE FROM Clientes WHERE DNI = ?");
 			ps.setString(1, txtDni.getText());
 			ps.executeUpdate();
-			JOptionPane.showMessageDialog(this, "Cliente borrado correctametne", "Todo OK", JOptionPane.INFORMATION_MESSAGE);
-			//llamamos al metodo limpiar datos
+			JOptionPane.showMessageDialog(this, "Cliente borrado correctametne", "Todo OK",
+					JOptionPane.INFORMATION_MESSAGE);
+			// llamamos al metodo limpiar datos
 			limpiarDatos();
-			
+
 		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
 			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
 
@@ -133,7 +134,6 @@ public class DialogCliente extends JFrame {
 		}
 	}
 
-
 	protected void actualizarCrearCliente(boolean isCrear) {// le decimos al boton actualizar que crear es falso
 		Connection conn = null;
 
@@ -144,14 +144,17 @@ public class DialogCliente extends JFrame {
 			String consulta;
 
 			if (isCrear) {
-				consulta = "INSERT INTO Clientes (Nombre, Ape1, Ape2, Fec_Nac, DNI) VALUES (?,?,?,?,?)"; // consulta para insert
+				consulta = "INSERT INTO Clientes (Nombre, Ape1, Ape2, Fec_Nac, DNI) VALUES (?,?,?,?,?)"; // consulta
+																											// para
+																											// insert
 			} else {
-				consulta = "UPDATE Clientes SET Nombre = ?, Ape1 = ?, Ape2 = ?, Fec_Nac = ? WHERE DNI = ? "; // consulta Update
-																											
+				consulta = "UPDATE Clientes SET Nombre = ?, Ape1 = ?, Ape2 = ?, Fec_Nac = ? WHERE DNI = ? "; // consulta
+																												// Update
+
 			}
 
 			PreparedStatement ps = conn.prepareStatement(consulta);
-			// pasamos los valores que queremos meter y hacemos omproaciones 
+			// pasamos los valores que queremos meter y hacemos omproaciones
 			if (txtNombre.getText().equals("")) {
 				JOptionPane.showMessageDialog(this, "Introduzca un nombre", "Nombre de cliente",
 						JOptionPane.ERROR_MESSAGE);
@@ -180,27 +183,27 @@ public class DialogCliente extends JFrame {
 
 			ps.setString(4, txtFechaNacimiento.getText());
 
-			if (isCrear && txtDni.equals("")) {//sino el campo de dni esta vacio entonces estamos creando cliente
+			if (isCrear && txtDni.equals("")) {// sino el campo de dni esta vacio entonces estamos creando cliente
 				JOptionPane.showMessageDialog(this, "Introduzca DNI", "DNI de cliente", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			ps.setString(5, txtDni.getText());
-			
+
 			ps.executeUpdate();
 			String mensajeResult;
-			
+
 			if (isCrear) {
-				
+
 				mensajeResult = "Se ha creado el cliente correctamente";
-				txtDni.setEditable(false); //despues de crear el cliente ya no dejará modificar el dni
-			
-			}else {
-				
+				txtDni.setEditable(false); // despues de crear el cliente ya no dejará modificar el dni
+
+			} else {
+
 				mensajeResult = "Se ha actualizado al cliente correctamente ";
 			}
-			
-			JOptionPane.showMessageDialog(this,  mensajeResult, "Todo OK", JOptionPane.INFORMATION_MESSAGE);
-			
+
+			JOptionPane.showMessageDialog(this, mensajeResult, "Todo OK", JOptionPane.INFORMATION_MESSAGE);
+
 		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
 			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
 
@@ -299,12 +302,23 @@ public class DialogCliente extends JFrame {
 		JMenuItem itmFactura = new JMenuItem("Facturas");
 		itmFactura.setMnemonic(KeyEvent.VK_T);
 		itmFactura.setAccelerator(KeyStroke.getKeyStroke("ctrl T"));
+		itmFactura.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				mostrarFacturas();
+			}
+		});
 
 		// Clientes
 		JMenuItem itmCliente = new JMenuItem("Clientes");
 		itmCliente.setMnemonic(KeyEvent.VK_C);
 		itmCliente.setAccelerator(KeyStroke.getKeyStroke("ctrl C"));
+		itmCliente.addActionListener(new ActionListener() {
 
+			public void actionPerformed(ActionEvent e) {
+				mostrarCliente();
+			}
+		});
 		dOpciones.add(itmChangeUsr);
 		dOpciones.add(cDatos);
 		dOpciones.add(lDatos);
@@ -313,6 +327,82 @@ public class DialogCliente extends JFrame {
 		menuBar.add(dOpciones);
 		menuBar.add(dInfo);
 		setJMenuBar(menuBar);
+
+	}
+
+	protected void mostrarFacturas() {
+		
+		
+		Connection conn = null;
+
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Acme?serverTimezone=Europe/Madrid", this.usuario,
+					this.contrasena);
+
+			
+			
+			PreparedStatement ps;
+			String consulta = "SELECT * FROM Facturas";
+			
+			
+			if(!txtDni.getText().equals("")) {
+				//
+				consulta += " WHERE Cliente = ?";
+				
+			}
+			ps = conn.prepareStatement(consulta);
+			
+			if(!txtDni.getText().equals("")) {
+				ps.setString(1, txtDni.getText());
+				
+			}
+			
+			ResultSet rs = ps.executeQuery();// almacenamos consultaa
+
+			new VistaListados(rs);
+			
+			
+
+		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
+			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
+
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException ex1) {
+					System.out.println("Excepción. Cerrando conexión");
+				}
+			}
+		}
+
+	}
+
+	protected void mostrarCliente() {
+
+		Connection conn = null;
+
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Acme?serverTimezone=Europe/Madrid", this.usuario,
+					this.contrasena);
+
+			PreparedStatement ps = conn.prepareStatement("SELECT * FROM Clientes;");
+			ResultSet rs = ps.executeQuery();// almacenamos consultaa
+
+			VistaListados vl = new VistaListados(rs);
+
+		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
+			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
+
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException ex1) {
+					System.out.println("Excepción. Cerrando conexión");
+				}
+			}
+		}
 
 	}
 
@@ -364,12 +454,12 @@ public class DialogCliente extends JFrame {
 				txtNombre.setText(rs.getString("Nombre"));
 				txtApellido1.setText(rs.getString("Ape1"));
 				txtApellido2.setText(rs.getObject("Ape2") == null ? "" : rs.getString("Ape2")); // hacemos la
-																										// comprobacion
-																										// con
-																										// getObject, si
-																										// es nula
-																										// dejamos campo
-																										// vacilo
+																								// comprobacion
+																								// con
+																								// getObject, si
+																								// es nula
+																								// dejamos campo
+																								// vacilo
 				// sino escribe apellido dos
 				txtFechaNacimiento.setText(rs.getDate("Fec_Nac").toString());
 
